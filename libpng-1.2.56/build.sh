@@ -16,5 +16,5 @@ build_lib() {
 build_lib
 set -x
 
-g++ -g -std=c++11 $FUZZ_CXXFLAGS $SCRIPT_DIR/target.cc BUILD/.libs/libpng12.a  -I BUILD/ -I BUILD -lz -o png-1.2.56-fuzz-binary
+g++ -g -std=c++11 $FUZZ_CXXFLAGS $SCRIPT_DIR/target.cc BUILD/.libs/libpng12.a  -I BUILD/ -I BUILD -lz -o png-1.2.56-wrapper-binary
 
