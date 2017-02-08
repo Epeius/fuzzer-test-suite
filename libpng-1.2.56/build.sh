@@ -1,9 +1,10 @@
 #!/bin/bash
 # Copyright 2016 Google Inc. All Rights Reserved.
 # Licensed under the Apache License, Version 2.0 (the "License");
+
 . $(dirname $0)/../common.sh
 
-[ ! -e libpng-1.2.56.tar.gz ] && wget ftp://ftp.simplesystems.org/pub/libpng/png/src/libpng12/libpng-1.2.56.tar.gz
+[ ! -e libpng-1.2.56.tar.gz ] && wget --no-check-certificate https://sourceforge.net/projects/libpng/files/libpng12/1.2.56/libpng-1.2.56.tar.gz 
 [ ! -e libpng-1.2.56 ] && tar xf libpng-1.2.56.tar.gz
 
 build_lib() {
@@ -13,6 +14,7 @@ build_lib() {
 }
 
 build_lib
-build_libfuzzer
 set -x
-clang++ -g -std=c++11 $FUZZ_CXXFLAGS $SCRIPT_DIR/target.cc BUILD/.libs/libpng12.a libFuzzer.a  -I BUILD/ -I BUILD -lz -o $EXECUTABLE_NAME_BASE-lf
+
+g++ -g -std=c++11 $FUZZ_CXXFLAGS $SCRIPT_DIR/target.cc BUILD/.libs/libpng12.a  -I BUILD/ -I BUILD -lz -o png-1.2.56-fuzz-binary
+

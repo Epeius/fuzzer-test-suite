@@ -4,9 +4,17 @@
 #include <string.h>
 #include <stdint.h>
 #include <assert.h>
-
+#include <stdio.h>
 #define PNG_INTERNAL  // For PNG_FLAG_CRC_CRITICAL_MASK, etc.
 #include "png.h"
+
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <sys/resource.h>
+#include <sys/mman.h>
+#include <sys/file.h>
+
+
 
 struct BufState {
   const uint8_t* data;
@@ -57,14 +65,52 @@ bool DetectLargeSize(const uint8_t *data, size_t size) {
   return false;
 }
 
+#define CLEANUP     \
+  do {             \
+    close(fd);        \
+    munmap(data, st.st_size); \
+  } while (0) 
+
+
 // Fuzzing entry point. Roughly follows the libpng book example:
 // http://www.libpng.org/pub/png/book/chapter13.html
-extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
+int main(int argc, char* argv[]) {
+  if (argc != 2) {
+    printf("Usage: %s filename\n", argv[0]);
+    return 0;
+  }
+
+  int fd;
+  fd = open(argv[1], O_RDWR);
+  if (fd < 0) {
+    printf("can't open target file.\n");
+    return -1;
+  }
+
+  // map png file to the memory
+  struct stat st;
+  if (fstat(fd, &st)) {
+    printf("fstat error.\n");
+    close(fd);
+    return -1;
+  }
+
+  uint8_t* data = (uint8_t*)mmap(0, st.st_size, PROT_READ, MAP_PRIVATE, fd, 0);
+  if (data == MAP_FAILED) {
+    printf("Unable to map file into memory.\n");
+    close(fd);
+    return -1;
+  }
+    
+  size_t size = st.st_size;
+  
   if (size < kPngHeaderSize) {
+    CLEANUP;
     return 0;
   }
   ScopedPngObject O;
   if (png_sig_cmp(const_cast<uint8_t*>(data), 0, kPngHeaderSize)) {
+    CLEANUP;
     // not a PNG.
     return 0;
   }
@@ -97,6 +143,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
 
   // libpng error handling.
   if (setjmp(png_ptr->jmpbuf)) {
+    CLEANUP;
     return 0;
   }
 
@@ -111,6 +158,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
   if (!png_get_IHDR(png_ptr, info_ptr, &width, &height,
         &bit_depth, &color_type, &interlace_type,
         &compression_type, &filter_type)) {
+    CLEANUP;
     return 0;
   }
 
@@ -127,5 +175,6 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
       png_read_row(png_ptr, static_cast<png_bytep>(O.row), NULL);
     }
   }
+  CLEANUP;
   return 0;
 }
