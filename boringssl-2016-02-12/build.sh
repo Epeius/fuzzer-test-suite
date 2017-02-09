@@ -3,10 +3,12 @@
 # Licensed under the Apache License, Version 2.0 (the "License");
 . $(dirname $0)/../common.sh
 
+echo ${PWD} 
+
 build_lib() {
   rm -rf BUILD
   cp -rf SRC BUILD
-  (cd BUILD && cmake  -DBUILD_SHARED_LIBS=OFF -DCMAKE_C_COMPILER=clang -DCMAKE_C_FLAGS="$FUZZ_CXXFLAGS" && make -j)
+  (cd BUILD && cmake  -DCMAKE_TOOLCHAIN_FILE=${PWD}/util/32-bit-toolchain.cmake -DCMAKE_SHARED_LINKER_FLAGS="-lssl -lcrypto -lmd" -DBUILD_SHARED_LIBS=OFF -DCMAKE_C_COMPILER=clang -DCMAKE_C_FLAGS="$FUZZ_CXXFLAGS" && make -j)
 }
 
 get_git_revision https://github.com/google/boringssl.git  894a47df2423f0d2b6be57e6d90f2bea88213382 SRC
