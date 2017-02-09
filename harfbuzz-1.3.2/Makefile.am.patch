@@ -1,0 +1,14 @@
+diff --git a/src/Makefile.am b/src/Makefile.am
+index 8cfe4ac..b6fb7d0 100644
+--- a/src/Makefile.am
++++ b/src/Makefile.am
+@@ -16,6 +16,9 @@ DISTCHECK_CONFIGURE_FLAGS = --enable-introspection
+ lib: $(BUILT_SOURCES) libharfbuzz.la
+ fuzzing: $(BUILT_SOURCES) libharfbuzz-fuzzing.la
+ 
++hb-ucdn/libhb-ucdn.la:
++	cd hb-ucdn && make -j8
++
+ lib_LTLIBRARIES = libharfbuzz.la
+ 
+ include Makefile.sources
