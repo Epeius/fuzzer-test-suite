@@ -6,12 +6,10 @@
 build_lib() {
   rm -rf BUILD
   cp -rf SRC BUILD
-  (cd BUILD && ./config && make clean && make CC="clang $FUZZ_CXXFLAGS"  -j $JOBS)
+  (cd BUILD && ./config -lmd && make clean && make CC="clang $FUZZ_CXXFLAGS"  -j $JOBS)
 }
 
 get_git_tag https://github.com/openssl/openssl.git OpenSSL_1_1_0c SRC
 build_lib
-build_libfuzzer
 set -x
-clang $FUZZ_CXXFLAGS -DFuzzerTestOneInput=LLVMFuzzerTestOneInput -c -g BUILD/fuzz/bignum.c -I BUILD/include
-clang++ bignum.o $FUZZ_CXXFLAGS BUILD/libssl.a BUILD/libcrypto.a libFuzzer.a -lgcrypt -o $EXECUTABLE_NAME_BASE
+clang++  -DMAIN -g target.cc -I BUILD/include $FUZZ_CXXFLAGS BUILD/libssl.a BUILD/libcrypto.a -lgcrypt -ldl -pthread -o openssl-1.1.0c-wrapper-bianry
