@@ -1,6 +1,3 @@
-# This is an i386 image of debian wheezy
-# Use it to compile the kernel
-
 FROM ubuntu:16.04 
 
 RUN \
