@@ -6,7 +6,7 @@
 build_lib() {
   rm -rf BUILD
   cp -rf SRC BUILD
-  (cd BUILD && ./config -lmd && make clean && make CC="clang $FUZZ_CXXFLAGS"  -j $JOBS)
+  (cd BUILD && setarch i386 ./config -m32 && make clean && make CC="clang $FUZZ_CXXFLAGS"  -j $JOBS)
 }
 
 get_git_tag https://github.com/openssl/openssl.git OpenSSL_1_0_2d SRC

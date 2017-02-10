@@ -6,10 +6,11 @@
 build_lib() {
   rm -rf BUILD
   cp -rf SRC BUILD
-  (cd BUILD && ./config -lmd && make clean && make CC="clang $FUZZ_CXXFLAGS"  -j $JOBS)
+  (cd BUILD && setarch i386 ./config -m32 && make clean && make CC="clang $FUZZ_CXXFLAGS"  -j $JOBS)
 }
 
 get_git_tag https://github.com/openssl/openssl.git OpenSSL_1_1_0c SRC
+#apt-get -y install g++-multilib
 build_lib
 set -x
 clang++  -DMAIN -g target.cc -I BUILD/include $FUZZ_CXXFLAGS BUILD/libssl.a BUILD/libcrypto.a -lgcrypt -ldl -pthread -o openssl-1.1.0c-wrapper-bianry
