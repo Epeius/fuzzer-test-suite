@@ -10,7 +10,7 @@ EXECUTABLE_NAME_BASE=$(basename $SCRIPT_DIR)
 echo $SCRIPT_DIR
 
 LIBFUZZER_SRC=$(dirname $(dirname $SCRIPT_DIR))/Fuzzer
-FUZZ_CXXFLAGS="-O2 -fno-omit-frame-pointer -g "
+FUZZ_CXXFLAGS="-O2 -fno-omit-frame-pointer -g -fsanitize=address "
 CORPUS=CORPUS-$EXECUTABLE_NAME_BASE
 JOBS=8
 
